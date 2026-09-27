@@ -1,0 +1,60 @@
+services:
+  altserver:
+    image: ${ALTSERVER_IMAGE:-altserver:local}
+    build: .
+    init: true
+    user: "10001:10001"
+    network_mode: host
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 96
+    mem_limit: 512m
+    stop_grace_period: 75s
+    environment:
+      ALTSERVER_ADMIN_PASSWORD_FILE: /run/secrets/admin_password
+      ALTSERVER_ANISETTE_URL: http://127.0.0.1:6969
+      ALTSERVER_WEB_ADDR: ${ALTSERVER_WEB_ADDR:-0.0.0.0:8080}
+      ALTSERVER_LISTEN_ADDR: ${ALTSERVER_LISTEN_ADDR:-0.0.0.0:6968}
+      ALTSERVER_INTERFACE: ${ALTSERVER_INTERFACE:-}
+      USBMUXD_SOCKET_ADDRESS: unix:///run/host-usbmuxd/usbmuxd
+    # Set this to the numeric group of your host's usbmuxd/netmuxd socket.
+    group_add: ["${USBMUXD_GID:-0}"]
+    volumes:
+      - state:/var/lib/altserver
+      - work:/var/cache/altserver
+      - type: bind
+        source: ${USBMUXD_SOCKET_PATH:-/var/run/usbmuxd}
+        target: /run/host-usbmuxd/usbmuxd
+        read_only: true
+        bind:
+          create_host_path: false
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    secrets: [admin_password]
+    depends_on:
+      anisette:
+        condition: service_started
+  anisette:
+    image: dadoum/anisette-v3-server:latest@sha256:cc149fd7e0b91ee73e22278c3d2e6571bdc8464491d66eb45cd239266f4dcdc9
+    restart: unless-stopped
+    read_only: true
+    environment:
+      XDG_RUNTIME_DIR: /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 256m
+    ports: ["127.0.0.1:6969:6969"]
+    volumes:
+      - anisette:/home/Alcoholic/.config/anisette-v3
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+secrets:
+  admin_password:
+    file: ./secrets/admin_password
+volumes:
+  state:
+  work:
+  anisette:

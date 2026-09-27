@@ -1,0 +1,12 @@
+.cache/
+.tools/
+bin/
+dist/
+data/
+secrets/
+.env
+*.ipa
+*.p12
+*.mobileprovision
+coverage.out
+!**/testdata/**
