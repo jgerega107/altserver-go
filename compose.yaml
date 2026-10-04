@@ -37,7 +37,7 @@ services:
       anisette:
         condition: service_started
   anisette:
-    image: dadoum/anisette-v3-server:latest@sha256:cc149fd7e0b91ee73e22278c3d2e6571bdc8464491d66eb45cd239266f4dcdc9
+    image: dadoum/anisette-v3-server:latest@sha256:8577c27cb7592900947960799bf03c79a53bf857ed951e4c48ef6e06c6e0f488
     restart: unless-stopped
     read_only: true
     environment:
