@@ -11,13 +11,13 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/altserver ./cmd/altserver \
     && go run scripts/licenses.go /out/licenses
 
-FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS signer
+FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS signer
 RUN apt-get update && apt-get install -y --no-install-recommends g++ make pkg-config libssl-dev libminizip-dev zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 COPY third_party/zsign /src/zsign
 RUN make -C /src/zsign/build/linux -j2 SYSTEM_MINIZIP=1 VERSION=source && strip /src/zsign/bin/zsign
 
-FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a
+FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libssl3t64 libstdc++6 libminizip1t64 zlib1g \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 10001 altserver \
